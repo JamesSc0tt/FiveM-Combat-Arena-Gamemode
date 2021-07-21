@@ -278,7 +278,7 @@
 					}
 				}
 				if (l.maps) {
-					$('.maps').html('')
+					$('.maparea').html('')
 					for (i = 0; i < l.maps.length; i++) {
 						var i = i
 						var m = l.maps[i]
@@ -286,7 +286,7 @@
 						if (m[4] == true) {
 							cstring = '<div class="check">✔</div>'
 						} 
-						$('.maps').append('<div class="map" style="background-image:url(\''+m[1]+'\')" onclick="addVote(this)" data-votetype="maps" data-voteid="'+i+'">'+
+						$('.maparea').append('<div class="map" style="background-image:url(\''+m[1]+'\')" onclick="addVote(this)" data-votetype="maps" data-voteid="'+i+'">'+
 							'<div class="vote">'+
 								'<span>'+m[2].length+'</span>/'+l.players.lobby.length+
 							'</div>'+
@@ -297,12 +297,26 @@
 						'</div>')
 					}
 				}
+				if (l.gamemodes) {
+					$('.gamemodearea').html('')
+					for (i = 0; i < l.gamemodes.length; i++) {
+						var gm = l.gamemodes[i]
+						var cstring = ''
+						if (gm[5]) {
+							cstring = '<div class="check">✔</div>'
+						}
+						$('.gamemodearea').append('<div class="gamemode" style="background-image:url(\''+gm[2]+'\')" onclick="addVote(this)" data-votetype="gamemodes" data-voteid="'+i+'">'+
+							'<div class="vote">'+
+								'<span>'+gm[4].length+'</span>/'+l.players.lobby.length+
+							'</div>'+
+							'<div class="name">'+
+								gm[1].toUpperCase()+
+								cstring+
+							'</div>'+
+						'</div>')
+					}
+				}
 			} 
-			if (m.update) {
-				// update all aspects of the lobby UI
-				// 	- scoreboard
-				// 	- main
-			}
 		});
 	});
 </script>

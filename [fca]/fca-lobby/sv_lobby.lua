@@ -25,9 +25,9 @@ local lobbyInfo = {
 	},
 	gamemodes = {
 		-- {shortname, name, description, votes}
-		{'tdm', 'Team Deathmatch', 'Players are split evenly randomly. First to 45 kills.', 0},
-		{'dm', 'Deathmatch', 'All players vs eachother, first to 20 kills.', 0},
-		{'br', 'Battle Royal', 'Last man standing, all players have 1 life and last man standing wins.', 0},
+		{'tdm', 'Team Deathmatch', 'tdm.jpg', 'Players are split evenly randomly. First to 45 kills.', {}},
+		{'dm', 'Deathmatch', 'tdm.jpg', 'All players vs eachother, first to 20 kills.', {}},
+		{'br', 'Battle Royal', 'tdm.jpg', 'Last man standing, all players have 1 life and last man standing wins.', {}},
 	},
 
 	players = {
@@ -146,6 +146,34 @@ AddEventHandler('fca-lobby:addVote', function( t, id )
 				exports['fca-discord']:AddDiscordLog('player', pname..' has changed their **MAP** vote to: '..lobbyInfo.maps[id][1]..' `Total '..#lobbyInfo.maps[id][3]..' votes`')
 			else
 				exports['fca-discord']:AddDiscordLog('player', pname..' has voted for **MAP**: '..lobbyInfo.maps[id][1]..' `Total '..#lobbyInfo.maps[id][3]..' votes`')
+			end
+		end
+	end
+
+	if t == 'gamemodes' then
+		-- remove old vote
+		local changed = false
+		local surpressdisc = false
+		for k,v in pairs(lobbyInfo.gamemodes) do
+			for key, val in pairs(v[5]) do
+				if val == source then
+					if  k == id then
+						-- dont spam disc for same
+						surpressdisc = true
+					end
+					changed = true
+					lobbyInfo.gamemodes[k][5][key] = nil
+				end
+			end
+		end
+		-- add new vote
+		table.insert(lobbyInfo.gamemodes[id][5], source)
+		print(lobbyInfo.gamemodes[id][2]..' now has '..#lobbyInfo.gamemodes[id][5]..' votes')
+		if not surpressdisc then
+			if changed then
+				exports['fca-discord']:AddDiscordLog('player', pname..' has changed their **GAMEMODE** vote to: '..lobbyInfo.gamemodes[id][2]..' `Total '..#lobbyInfo.gamemodes[id][5]..' votes`')
+			else
+				exports['fca-discord']:AddDiscordLog('player', pname..' has voted for **GAMEMODE**: '..lobbyInfo.gamemodes[id][2]..' `Total '..#lobbyInfo.gamemodes[id][5]..' votes`')
 			end
 		end
 	end
