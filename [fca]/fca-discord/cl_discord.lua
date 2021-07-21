@@ -1,0 +1,11 @@
+Citizen.CreateThread(function()
+    SetDiscordAppId(867408299774836736)
+    SetDiscordRichPresenceAsset('big-logo')
+    SetDiscordRichPresenceAssetText('combatarena.co/discord')
+    SetDiscordRichPresenceAssetSmall('small-logo')
+    SetDiscordRichPresenceAssetSmallText('FCA')
+    AddTextEntry('FE_THDR_GTAO', 'FiveM Combat Arena')
+    SetDiscordRichPresenceAction(0, 'Play Now', 'https://combatarena.co/play')
+
+    SetRichPresence("FiveM Combat Arena")
+end)
