@@ -1,10 +1,7 @@
 local seconds = 0
 local round_start = 0
 
-local round_data = {
-
-}
-
+local round_data = {}
 local lobby_data = {}
 
 local round_pending = false
@@ -25,16 +22,50 @@ end)
 
 RegisterNetEvent('fca-round:start', function(lobby)
 	print 'fca-round:start'
-	lobby_data = lobby
+	lobby_data = lobby -- reset at start of each round
 	local gm = lobby.gamemodes[lobby.gamemode][1]
 	local map = lobby.map
 
+	round_data = {} -- reset at start of each round
 
 	if gm == 'tdm' then
 		round_data.teams = {
-			[1] = {},
-			[2] = {},
+			kilks = {
+				[1] = 0,
+				[2] = 0,
+			},
+			players = {
+				[1] = {},
+				[2] = {},
+			}
 		}
+		for k,v in pairs(lobby.players.active) do
+			if (k % 2 == 0) then
+				table.insert(round_data.teams[1].players, #round_data.teams[1].players, {
+					player = v[1], 
+					kills = 0,
+					deaths = 0
+				})
+				print('adding '..v[1]..' to team 1')
+			else
+				table.insert(round_data.teams[2].players, #round_data.teams[2].players, {
+					player = v[1], 
+					kills = 0,
+					deaths = 0
+				})
+				print('adding '..v[1]..' to team 2')
+			end
+		end
+	end
+	if gm == 'dm' then
+		for k,v in pairs(lobby.players.active) do
+			table.insert(round_data.teams[1].players, #round_data.teams[1].players, {
+				player = v[1], 
+				kills = 0,
+				deaths = 0
+			})
+			print('adding '..v[1]..' to round players')
+		end
 	end
 
 	round_pending = true
@@ -62,6 +93,12 @@ AddEventHandler('fca-round:spawned', function()
 	end
 end)
 
+function startRound()
+	TriggerClientEvent('FeedM:showNotification', -1, '~g~STARTING!~w~ Good luck...')
+	round_timeout = seconds + 1800
+	round_pending = false
+	round_active = true
+end
 
 -- do stuff every second
 Citizen.CreateThread(function()
@@ -73,18 +110,15 @@ Citizen.CreateThread(function()
 				TriggerClientEvent('FeedM:showNotification', -1, '~g~START:~w~ 15 seconds...')
 			end
 			if round_start == seconds then
-				TriggerClientEvent('FeedM:showNotification', -1, '~g~STARTING!~w~ Good luck...')
+				startRound()
 			end
-			--[[
-			if round_start >= seconds then
-				-- start round
-				for k,v in pairs(lobby_data.players.active) do
-					TriggerClientEvent('fca-round:start', v[1])
-				end
-				round_pending = false
-				round_active = true
+		end
+
+		if round_active then
+			if round_timeout == seconds then
+				TriggerClientEvent('FeedM:showNotification', -1, '~r~END:~w~ The game lasted more than 30 minutes.')
+				endRound()
 			end
-			]]
 		end
 	end
 end)
