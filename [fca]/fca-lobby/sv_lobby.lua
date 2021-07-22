@@ -218,6 +218,7 @@ Citizen.CreateThread(function()
 							map_votes = {#v[3], k}
 						end
 					end
+					winner_map = map_votes[2]
 
 					local gm_votes = {0, winner_gm}
 					for k,v in pairs(lobbyInfo.gamemodes) do
@@ -225,6 +226,7 @@ Citizen.CreateThread(function()
 							gm_votes = {#v[5], k}
 						end
 					end
+					winner_gm = gm_votes[2]
 
 					local discstring = '```Voting has ended, results:\n'
 					discstring = discstring .. ' - Winning map: '..lobbyInfo.maps[map_votes[2]][1]..' ('..map_votes[1]..' votes)\n'
@@ -236,7 +238,9 @@ Citizen.CreateThread(function()
 					lobbyInfo.game_active = true
 
 					lobbyInfo.map = winner_map
+					print('winner map: '..winner_map)
 					lobbyInfo.gamemode = winner_gm
+					print('winner gm: '..winner_gm)
 
 					lobbyInfo.players.active = lobbyInfo.players.lobby
 					lobbyInfo.players.lobby = {}

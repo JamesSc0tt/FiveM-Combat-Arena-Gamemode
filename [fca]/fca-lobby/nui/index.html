@@ -256,13 +256,14 @@
 		window.addEventListener('message', function (event) {
 			var m = event.data
 			var l = m.lobbydata
-			if (m.display == false) {
+			if (m.hide) {
 				$('body').hide()
 			}
 			if (m.display == true) {
 				// display and update the main lobby UI
-
 				$('body').show()
+			}
+			if (m.lobbydata) {
 				// time
 				$('#time').text(l.lobby_remaining)
 

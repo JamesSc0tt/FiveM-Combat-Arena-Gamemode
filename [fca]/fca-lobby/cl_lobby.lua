@@ -2,43 +2,47 @@ local uiActive = false
 
 RegisterNetEvent('fca-lobby:destroy')
 AddEventHandler('fca-lobby:destroy', function()
+	print'destroy???'
 	SendNUIMessage({
-		display = false,
+		hide = true,
 	})
 	SetNuiFocus(false)
 end)
 
+RegisterNetEvent('fca-lobby:reset')
+
 RegisterNetEvent('fca-lobby:ui')
 AddEventHandler('fca-lobby:ui', function(info)
 	-- update the UI
+	for k, v in pairs(info.maps) do
+		local votedmap = false
+		for key, val in pairs(v[3]) do
+			if val == GetPlayerServerId(PlayerId()) then
+				votedmap = true
+			end
+		end
+		if votedmap then
+			info.maps[k][5] = true
+		else
+			info.maps[k][5] = false
+		end
+	end
+	for k, v in pairs(info.gamemodes) do
+		local votedgm = false
+		for key, val in pairs(v[5]) do
+			if val == GetPlayerServerId(PlayerId()) then
+				votedgm = true
+			end
+		end
+		if votedgm then
+			info.gamemodes[k][6] = true
+		else
+			info.gamemodes[k][6] = false
+		end
+	end
 	if not uiActive then
 		-- show ui
-		for k, v in pairs(info.maps) do
-			local votedmap = false
-			for key, val in pairs(v[3]) do
-				if val == GetPlayerServerId(PlayerId()) then
-					votedmap = true
-				end
-			end
-			if votedmap then
-				info.maps[k][5] = true
-			else
-				info.maps[k][5] = false
-			end
-		end
-		for k, v in pairs(info.gamemodes) do
-			local votedgm = false
-			for key, val in pairs(v[5]) do
-				if val == GetPlayerServerId(PlayerId()) then
-					votedgm = true
-				end
-			end
-			if votedgm then
-				info.gamemodes[k][6] = true
-			else
-				info.gamemodes[k][6] = false
-			end
-		end
+		uiActive = true
 		SendNUIMessage({
 			display = true,
 			lobbydata = info,
@@ -46,6 +50,10 @@ AddEventHandler('fca-lobby:ui', function(info)
 		SetNuiFocus(true, true)
 	else
 		-- send update
+		SendNUIMessage({
+			display = false,
+			lobbydata = info,
+		})
 	end
 end)
 
