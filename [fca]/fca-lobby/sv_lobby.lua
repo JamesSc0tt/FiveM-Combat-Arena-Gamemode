@@ -41,6 +41,37 @@ local lobbyInfo = {
 	}
 }
 
+
+RegisterServerEvent('fca-lobby:reset')
+AddEventHandler('fca-lobby:reset', function()
+	-- add all current players to lobby and reset
+
+	-- save old
+	lobbyInfo.last['gamemode'] = lobbyInfo.gamemode
+	lobbyInfo.last['map'] = lobbyInfo.map
+
+	lobbyInfo.players = {
+		lobby = {}, 
+		active = {}, -- active players in a session 
+		spectate = {}, -- dead / spectating players in a session
+	}
+
+	for k,v in pairs(lobbyInfo.maps) do
+		-- reset votes
+		lobbyInfo.maps[k][3] = {}
+	end
+	for k,v in pairs(lobbyInfo.gamemodes) do
+		-- reset votes
+		lobbyInfo.gamemodes[k][5] = {}
+	end
+
+	lobbyInfo.lobby_active = false
+	lobbyInfo.game_active = false
+
+	TriggerClientEvent('fca-lobby:reset', -1)
+end)
+
+
 RegisterServerEvent('fca-lobby:register')
 AddEventHandler('fca-lobby:register', function()
 	local disc = exports['fca-spawn']:GetPlayerDiscord(source)

@@ -10,6 +10,11 @@ AddEventHandler('fca-lobby:destroy', function()
 end)
 
 RegisterNetEvent('fca-lobby:reset')
+AddEventHandler('fca-lobby:reset', function()
+	uiActive = false
+	Citizen.Wait(math.random(100,500)) -- make it so all players dont try to create at once
+	TriggerServerEvent('fca-lobby:register')
+end)
 
 RegisterNetEvent('fca-lobby:ui')
 AddEventHandler('fca-lobby:ui', function(info)
