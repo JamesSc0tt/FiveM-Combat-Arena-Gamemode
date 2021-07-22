@@ -1,6 +1,7 @@
-local round_active = true
+local round_active = false
 local seconds = 0
-local active_map = 1
+local active_map = 0
+local active_gm = 0
 
 local mapdata = {
 	[1] = { -- bolingbroke
@@ -59,3 +60,46 @@ Citizen.CreateThread(function()
 		seconds = seconds + 1 -- easiest way to do that
 	end
 end)
+
+function ReSpawn()
+	local map = mapdata[active_map]
+
+	local coords = vector3(map.center.x, map.center.y, map.center.z)
+	local range = map.range / 2 - 50
+	local x = coords.x + math.random(-range, range)
+	local y = coords.y + math.random(-range, range)
+
+	local spawned = false
+
+	FreezeEntityPosition(GetPlayerPed(-1),false)
+
+	while not spawned do
+		Citizen.Wait(0)
+		local foundSafeCoords, safeCoords = GetSafeCoordForPed(x, y, coords.z, false , 16)
+		if not foundSafeCoords then
+			TriggerEvent('FeedM:showNotification', '~y~ Could not find safe coords!')
+		else
+			SetEntityCoords(GetPlayerPed(-1), safeCoords)
+			TriggerEvent('FeedM:showNotification', '~g~Safe to spawn')
+			spwaned = true
+			break
+		end
+	end
+
+	-- reset player
+	SetEntityAlpha(PlayerPedId(), 51, false)
+	FreezeEntityPosition(GetPlayerPed(-1),true)
+
+	TriggerServerEvent('fca-round:spawned')
+end
+
+RegisterNetEvent('fca-round:loading')
+AddEventHandler('fca-round:loading', function(map)
+	active_map = map
+	local map = mapdata[map]
+	ReSpawn()
+	Citizen.Wait(100)
+end)
+
+
+TriggerEvent('fca-round:loading', 1)
