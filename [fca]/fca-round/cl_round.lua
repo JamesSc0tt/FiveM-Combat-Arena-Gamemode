@@ -8,6 +8,13 @@ local mapdata = {
 		center = { x = 1694.250, y = 2598.964, z = 45.56 },
 		range = 300.0
 	},
+	[2] = { -- humane labs
+		center = { x = 3524.551, y = 3704.953, z = 36.6172 },
+		backupspawns = {
+			{3574.70, 3784.83, 30.0}
+		},
+		range = 300.0
+	},
 }
 
 local in_area = true
@@ -62,7 +69,22 @@ Citizen.CreateThread(function()
 end)
 
 function ReSpawn()
+	print('sorting respawn for '..active_map)
 	local map = mapdata[active_map]
+	if not map then
+		print('NO MAP '..active_map)
+		active_map = 1
+		map = mapdata[1]
+	end
+
+	TriggerEvent('FeedM:showNotification', 'Generating map scenery...')
+
+	SetEntityCoords(GetPlayerPed(-1), map.center.x, map.center.y, map.center.z)
+	FreezeEntityPosition(GetPlayerPed(-1),true)
+	SetEntityAlpha(PlayerPedId(), 51, false)
+	SetEntityInvincible(GetPlayerPed(-1), true)
+
+	Citizen.Wait(3000)
 
 	local coords = vector3(map.center.x, map.center.y, map.center.z)
 	local range = map.range / 2 - 50
@@ -72,12 +94,27 @@ function ReSpawn()
 	local spawned = false
 
 	FreezeEntityPosition(GetPlayerPed(-1),false)
-
+	local count = 0
 	while not spawned do
 		Citizen.Wait(0)
+		map = mapdata[active_map]
 		local foundSafeCoords, safeCoords = GetSafeCoordForPed(x, y, coords.z, false , 16)
 		if not foundSafeCoords then
-			TriggerEvent('FeedM:showNotification', '~y~ Could not find safe coords!')
+			SetEntityCoords(GetPlayerPed(-1), map.center.x, map.center.y, map.center.z)
+			TriggerEvent('FeedM:showNotification', '~y~Could not find safe coords!')
+			count = count + 1
+			if count >= 3 then
+				-- use backup coords
+				if map.backupspawns then
+					local spawnloc = map.backupspawns[math.random(1, #map.backupspawns)]
+					SetEntityCoords(GetPlayerPed(-1), spawnloc)
+					TriggerEvent('FeedM:showNotification', '~r~USING PRESET SPAWN')
+					spawned = true
+					break
+				else
+					TriggerEvent('FeedM:showNotification', '~r~This map ('..active_map..') has no preset spawns, this will take longer...')
+				end
+			end
 		else
 			SetEntityCoords(GetPlayerPed(-1), safeCoords)
 			TriggerEvent('FeedM:showNotification', '~g~Safe to spawn')
@@ -87,19 +124,29 @@ function ReSpawn()
 	end
 
 	-- reset player
-	SetEntityAlpha(PlayerPedId(), 51, false)
-	FreezeEntityPosition(GetPlayerPed(-1),true)
+	TriggerEvent('FeedM:showNotification', 'Waiting for other players to spawn...')
+	
 
 	TriggerServerEvent('fca-round:spawned')
 end
 
+Citizen.CreateThread(function()
+	-- body
+	--ReSpawn()
+end)
+
 RegisterNetEvent('fca-round:loading')
 AddEventHandler('fca-round:loading', function(map)
+	print 'fca-round:loading'
 	active_map = map
 	local map = mapdata[map]
+	--DoScreenFadeOut(1000)
+	Citizen.Wait(500)
+	TriggerEvent('fca-lobby:destroy')
 	ReSpawn()
-	Citizen.Wait(100)
+	Citizen.Wait(500)
+	--DoScreenFadeIn(500)
 end)
 
 
-TriggerEvent('fca-round:loading', 1)
+-- TriggerEvent('fca-round:loading', 1)
