@@ -130,6 +130,22 @@ function ReSpawn()
 	TriggerServerEvent('fca-round:spawned')
 end
 
+RegisterNetEvent('fca-round:start')
+AddEventHandler('fca-round:start', function(items)
+	print'fca-round:start'
+	SetEntityInvincible(GetPlayerPed(-1), false)
+	SetEntityAlpha(PlayerPedId(), 255, false)
+	SetEntityMaxHealth(GetPlayerPed(-1), 200)
+	SetEntityHealth(GetPlayerPed(-1), 200)
+	SetPedArmour(GetPlayerPed(-1), 100)
+	SetMaxHealthHudDisplay(200)
+end)
+
+RegisterNetEvent('fca-lobby:respawn')
+AddEventHandler('fca-lobby:respawn', function(items)
+	
+end)
+
 Citizen.CreateThread(function()
 	-- body
 	--ReSpawn()
