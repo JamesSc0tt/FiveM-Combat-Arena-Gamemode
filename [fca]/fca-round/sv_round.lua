@@ -83,6 +83,10 @@ AddEventHandler('fca-round:spawned', function()
 	print 'fca-round:spawned'
 	local pname = GetPlayerName(source)
 	lobby_data.players.active = {{1}}
+
+	TriggerClientEvent('fca-misc:text:LG', source, lobby_data.gamemodes[lobby_data.gamemode][2], {0,255,0}, 30)
+	TriggerClientEvent('fca-misc:text:SM', source, lobby_data.gamemodes[lobby_data.gamemode][4], {255,255,255}, 30)
+
 	if round_pending == true then
 		-- round pending
 		round_spawned[source] = true
