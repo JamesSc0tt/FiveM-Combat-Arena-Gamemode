@@ -226,7 +226,11 @@ Citizen.CreateThread(function()
 						end
 					end
 
-					exports['fca-discord']:AddDiscordLog('player', '```Voting has ended, results:\n - Winning map: '..lobbyInfo.maps[gm_votes[2]][1]..' ('..gm_votes[1]..' votes)\n - Winning gamemode: '..lobbyInfo.gamemodes[gm_votes[2]][2]..' ('..gm_votes[1]..' votes)```')
+					local discstring = '```Voting has ended, results:\n'
+					discstring = discstring .. ' - Winning map: '..lobbyInfo.maps[map_votes[2]][1]..' ('..map_votes[1]..' votes)\n'
+					discstring = discstring .. ' - Winning gamemode: '..lobbyInfo.gamemodes[gm_votes[2]][2]..' ('..gm_votes[1]..' votes)```'
+
+					exports['fca-discord']:AddDiscordLog('player', discstring)
 				
 					lobbyInfo.lobby_active = false
 					lobbyInfo.game_active = true

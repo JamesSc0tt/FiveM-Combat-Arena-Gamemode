@@ -256,7 +256,10 @@
 		window.addEventListener('message', function (event) {
 			var m = event.data
 			var l = m.lobbydata
-			if (m.display) {
+			if (m.display == false) {
+				$('body').hide()
+			}
+			if (m.display == true) {
 				// display and update the main lobby UI
 
 				$('body').show()

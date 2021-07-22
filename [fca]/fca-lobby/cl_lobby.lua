@@ -1,5 +1,13 @@
 local uiActive = false
 
+RegisterNetEvent('fca-lobby:destroy')
+AddEventHandler('fca-lobby:destroy', function()
+	SendNUIMessage({
+		display = false,
+	})
+	SetNuiFocus(false)
+end)
+
 RegisterNetEvent('fca-lobby:ui')
 AddEventHandler('fca-lobby:ui', function(info)
 	-- update the UI
