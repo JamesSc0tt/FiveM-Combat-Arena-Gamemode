@@ -41,14 +41,14 @@ RegisterNetEvent('fca-round:start', function(lobby)
 		}
 		for k,v in pairs(lobby.players.active) do
 			if (k % 2 == 0) then
-				table.insert(round_data.teams[1].players, #round_data.teams[1].players, {
+				table.insert(round_data.teams[1].players, #round_data.teams[1].players+1, {
 					player = v[1], 
 					kills = 0,
 					deaths = 0
 				})
 				print('adding '..v[1]..' to team 1')
 			else
-				table.insert(round_data.teams[2].players, #round_data.teams[2].players, {
+				table.insert(round_data.teams[2].players, #round_data.teams[2].players+1, {
 					player = v[1], 
 					kills = 0,
 					deaths = 0
@@ -58,8 +58,9 @@ RegisterNetEvent('fca-round:start', function(lobby)
 		end
 	end
 	if gm == 'dm' then
+		round_data.players = {}
 		for k,v in pairs(lobby.players.active) do
-			table.insert(round_data.teams[1].players, #round_data.teams[1].players, {
+			table.insert(round_data.players, #round_data.players+1, {
 				player = v[1], 
 				kills = 0,
 				deaths = 0
@@ -98,7 +99,27 @@ function startRound()
 	round_timeout = seconds + 1800
 	round_pending = false
 	round_active = true
+	for k,v in pairs(lobby_data.players.active) do
+		print('sending fca-round:start: '..v[1])
+		TriggerClientEvent('fca-round:start', v[1])
+	end 
 end
+
+function endRound()
+	-- body
+	round_pending = false
+	round_active = false
+	TriggerEvent('fca-lobby:reset')
+end
+
+RegisterCommand("reset_lobby", function(source)
+	if source > 0 then
+		print 'whoareyou?'
+	else
+		endRound()
+	end
+	exports['fca-discord']:AddDiscordLog('player', '**The lobby has been force reset by an admin.**')
+end)
 
 -- do stuff every second
 Citizen.CreateThread(function()
