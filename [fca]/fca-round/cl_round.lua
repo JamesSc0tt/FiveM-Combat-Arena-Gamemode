@@ -141,6 +141,11 @@ AddEventHandler('fca-round:start', function(items)
 	SetMaxHealthHudDisplay(200)
 end)
 
+RegisterNetEvent('fca-round:end')
+AddEventHandler('fca-round:end', function()
+	round_active = false
+end)
+
 RegisterNetEvent('fca-lobby:respawn')
 AddEventHandler('fca-lobby:respawn', function(items)
 	

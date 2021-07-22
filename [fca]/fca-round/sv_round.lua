@@ -110,6 +110,7 @@ function endRound()
 	round_pending = false
 	round_active = false
 	TriggerEvent('fca-lobby:reset')
+	TriggerClientEvent('fca-round:end', -1)
 end
 
 RegisterCommand("reset_lobby", function(source)
