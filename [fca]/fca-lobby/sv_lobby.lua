@@ -212,7 +212,21 @@ Citizen.CreateThread(function()
 					local winner_map = math.random(1, #lobbyInfo.maps)
 					local winner_gm = math.random(1, #lobbyInfo.gamemodes)
 
-					exports['fca-discord']:AddDiscordLog('player', '```The game has begun!\n - Winning map: '..lobbyInfo.maps[winner_map][1]..'\n - Winning gamemode: '..lobbyInfo.gamemodes[winner_gm][2]..'```')
+					local map_votes = {0, winner_map}
+					for k,v in pairs(lobbyInfo.maps) do
+						if #v[3] > map_votes[1] then
+							map_votes = {#v[3], k}
+						end
+					end
+
+					local gm_votes = {0, winner_gm}
+					for k,v in pairs(lobbyInfo.gamemodes) do
+						if #v[5] > gm_votes[1] then
+							gm_votes = {#v[5], k}
+						end
+					end
+
+					exports['fca-discord']:AddDiscordLog('player', '```Voting has ended, results:\n - Winning map: '..lobbyInfo.maps[gm_votes[2]][1]..' ('..gm_votes[1]..' votes)\n - Winning gamemode: '..lobbyInfo.gamemodes[gm_votes[2]][2]..' ('..gm_votes[1]..' votes)```')
 				
 					lobbyInfo.lobby_active = false
 					lobbyInfo.game_active = true
@@ -220,7 +234,10 @@ Citizen.CreateThread(function()
 					lobbyInfo.map = winner_map
 					lobbyInfo.gamemode = winner_gm
 
-					TriggerClientEvent('fca-round:start', -1)
+					lobbyInfo.players.active = lobbyInfo.players.lobby
+					lobbyInfo.players.lobby = {}
+
+					TriggerEvent('fca-round:start', lobbyInfo)
 				else	
 					-- reset counter, not enough players
 					lobbyInfo.lobby_remaining = 60
