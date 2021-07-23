@@ -36,7 +36,6 @@ local secondInventory_limits = {
 }
 
 function fsn_CanCarry(item, amt, weight)
-	if exports["fsn_police"]:fsn_PDDuty() then return true end -- no weight limit for cops, only slot limit
 	if presetItems[item] and presetItems[item].data and presetItems[item].data.weight then
 		local maff = presetItems[item].data.weight * amt
 		if fsn_CurrentWeight() + maff <= max_weight then
@@ -153,11 +152,6 @@ end)
 ]]
 
 local name = ''
-
-AddEventHandler('fsn_main:character', function(character)
-	name = character.char_fname..' '..character.char_lname
-end)
-
 function setItemOwner(shoptype , item)
 	if item.customData ~= nil  then
 		if item.index == 'WEAPON_STUNGUN' or item.customData.ammotype ~= 'none' then

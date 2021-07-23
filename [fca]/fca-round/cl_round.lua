@@ -62,6 +62,42 @@ Citizen.CreateThread(function()
 	end
 end)
 
+AddEventHandler("playerSpawned", function()
+  Citizen.CreateThread(function()
+    local player = PlayerId()
+    local playerPed = GetPlayerPed(-1)
+    -- Enable pvp
+    NetworkSetFriendlyFireOption(true)
+    SetCanAttackFriendly(playerPed, true, true)
+  end)
+end)
+
+
+Citizen.CreateThread(function()
+  while true do
+    Citizen.Wait(0)
+    local playerPed = GetPlayerPed(-1)
+    local playerLocalisation = GetEntityCoords(playerPed)
+    ClearAreaOfCops(playerLocalisation.x, playerLocalisation.y, playerLocalisation.z, 400.0)
+  end
+end)
+Citizen.CreateThread(function()
+    while true do
+      Citizen.Wait(0)
+	  for i = 1, 12 do
+			EnableDispatchService(i, false)
+		end
+      if GetPlayerWantedLevel(PlayerId()) ~= 0 then
+        SetPlayerWantedLevel(PlayerId(), 0, false)
+			  SetPoliceIgnorePlayer(PlayerId(), true)
+		    SetDispatchCopsForPlayer(PlayerId(), false)
+        SetPlayerWantedLevelNow(PlayerId(), false)
+      end
+      DisablePlayerVehicleRewards(PlayerId())
+    end
+end)
+
+
 Citizen.CreateThread(function()
 	while true do Citizen.Wait(1000)
 		seconds = seconds + 1 -- easiest way to do that
@@ -76,6 +112,13 @@ function ReSpawn()
 		active_map = 1
 		map = mapdata[1]
 	end
+
+	TriggerEvent('fsn_inventory:items:emptyinv')
+	SetEntityCoordsNoOffset(GetPlayerPed(-1), GetEntityCoords(GetPlayerPed(-1)), false, false, false, true)
+	NetworkResurrectLocalPlayer(GetEntityCoords(GetPlayerPed(-1)), GetEntityHeading(GetPlayerPed(-1)), true, true, false)
+	ClearPedTasksImmediately(GetPlayerPed(-1))
+	RemoveAllPedWeapons(GetPlayerPed(-1))
+	ClearPlayerWantedLevel(PlayerId())
 
 	TriggerEvent('FeedM:showNotification', 'Generating map scenery...')
 
@@ -133,6 +176,18 @@ end
 RegisterNetEvent('fca-round:start')
 AddEventHandler('fca-round:start', function(items)
 	print'fca-round:start'
+
+	-- respawn ped
+	TriggerEvent('fsn_inventory:items:emptyinv')
+	SetEntityCoordsNoOffset(GetPlayerPed(-1), GetEntityCoords(GetPlayerPed(-1)), false, false, false, true)
+	NetworkResurrectLocalPlayer(GetEntityCoords(GetPlayerPed(-1)), GetEntityHeading(GetPlayerPed(-1)), true, true, false)
+	ClearPedTasksImmediately(GetPlayerPed(-1))
+	RemoveAllPedWeapons(GetPlayerPed(-1))
+	ClearPlayerWantedLevel(PlayerId())
+
+	NetworkSetFriendlyFireOption(true)
+    SetCanAttackFriendly(GetPlayerPed(-1), true, true)
+
 	SetEntityInvincible(GetPlayerPed(-1), false)
 	SetEntityAlpha(PlayerPedId(), 255, false)
 	SetEntityMaxHealth(GetPlayerPed(-1), 200)
@@ -148,7 +203,11 @@ end)
 
 RegisterNetEvent('fca-lobby:respawn')
 AddEventHandler('fca-lobby:respawn', function(items)
-	
+	SetEntityCoordsNoOffset(GetPlayerPed(-1), GetEntityCoords(GetPlayerPed(-1)), false, false, false, true)
+	NetworkResurrectLocalPlayer(GetEntityCoords(GetPlayerPed(-1)), GetEntityHeading(GetPlayerPed(-1)), true, true, false)
+	ClearPedTasksImmediately(GetPlayerPed(-1))
+	RemoveAllPedWeapons(GetPlayerPed(-1))
+	ClearPlayerWantedLevel(PlayerId())
 end)
 
 Citizen.CreateThread(function()

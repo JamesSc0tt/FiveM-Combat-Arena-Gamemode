@@ -71,6 +71,21 @@ AddEventHandler('fca-lobby:reset', function()
 	TriggerClientEvent('fca-lobby:reset', -1)
 end)
 
+local bypass_playlimits = {
+
+}
+
+
+function allLobbyMembersActive()
+	local active = true
+	for k,v in pairs(lobbyInfo.players.lobby) do
+		if GetPlayerPing(v[1]) <= 0 then
+			print(v[1]..' is not active in lobby!')
+			active = false
+		end
+	end
+	return active
+end
 
 RegisterServerEvent('fca-lobby:register')
 AddEventHandler('fca-lobby:register', function()
@@ -80,25 +95,22 @@ AddEventHandler('fca-lobby:register', function()
 	end
 	local pname  = "**"..GetPlayerName(source).."**"
 
-	-- check if player is somehow already in the table
-	for k,v in pairs(lobbyInfo.players.active) do
-		if v[3] == disc then
-			print(pname..' was already in active, removing')
-			lobbyInfo.players.active[k] = nil -- remove
+	local bypass_playlimit = false
+	for k,v in pairs(bypass_playlimits) do
+		if v == disc then
+			print(disc..' is immune from lobby playlimit!')
+			bypass_playlimit = true
 		end
 	end
-
-	for k,v in pairs(lobbyInfo.players.lobby) do
-		if v[3] == disc then
-			print(pname..' was already in lobby, removing')
-			lobbyInfo.players.lobby[k] = nil -- remove
-		end
-	end
-
-	for k,v in pairs(lobbyInfo.players.spectate) do
-		if v[3] == disc then
-			print(pname..' was already in spectate, removing')
-			lobbyInfo.players.spectate[k] = nil -- remove
+	if not bypass_playlimit then
+		-- check if player is somehow already in the table
+		for k,v in pairs(lobbyInfo.players) do
+			for key,val in pairs(v) do
+				if val[3] == disc then
+					lobbyInfo.players[k][key] = nil -- remove
+					print(pname..' ('..disc..') already in player list & not in bypass_playlimits: '..key)
+				end
+			end
 		end
 	end
 	if not lobbyInfo.lobby_active then
@@ -127,13 +139,19 @@ AddEventHandler('fca-lobby:register', function()
 			
 		end
 	else
-		-- first player in lobby :) 
-		print('Lobby is active, adding player '..pname..' to active')
-		TriggerClientEvent('FeedM:showNotification', -1, '~o~'..pname..' has joined the lobby!')
-		table.insert(lobbyInfo.players.lobby, {source, GetPlayerName(source), disc, false, false})
-		exports['fca-discord']:AddDiscordLog('player', pname..' has joined the lobby')
+		-- check lobby is not empty
+		if not allLobbyMembersActive() then
+			-- someone has left, reset
+			exports['fca-round']:endRound()
+		else
+			-- not first player in lobby :) 
+			print('Lobby is active, adding player '..pname..' to active')
+			TriggerClientEvent('FeedM:showNotification', -1, '~o~'..pname..' has joined the lobby!')
+			table.insert(lobbyInfo.players.lobby, {source, GetPlayerName(source), disc, false, false})
+			exports['fca-discord']:AddDiscordLog('player', pname..' has joined the lobby')
 
-		TriggerClientEvent('fca-lobby:ui', source, lobbyInfo)
+			TriggerClientEvent('fca-lobby:ui', source, lobbyInfo)
+		end
 	end
 end)
 
@@ -230,10 +248,10 @@ Citizen.CreateThread(function()
 			end
 
 			-- force players to 2 to test
-			lobbyInfo.players.lobby = {
-				{1, 'JamesSc0tt1', 'something', false, false},
-				{2, 'JamesSc0tt2', 'something', false, false}
-			}
+			--lobbyInfo.players.lobby = {
+			--	{1, 'JamesSc0tt1', 'something', false, false},
+			--	{2, 'JamesSc0tt2', 'something', false, false}
+			--}
 
 			if lobbyInfo.lobby_remaining <= 1 or ready then
 				-- start game
@@ -294,5 +312,13 @@ Citizen.CreateThread(function()
 			end
 			TriggerClientEvent('fca-lobby:ui', -1, lobbyInfo)
 		end
+	end
+end)
+
+RegisterCommand("start_lobby", function(source)
+	if source > 0 then
+		print 'whoareyou?'
+	else
+		lobbyInfo.lobby_remaining = 1
 	end
 end)
