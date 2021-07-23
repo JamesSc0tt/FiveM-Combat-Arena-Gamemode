@@ -13,8 +13,12 @@ local servers = {
 	},
 }
 
+local lastmsg = ''
+
 function AddDiscordLog(t, l, src)
 	if not enabled then return end
+	if lastmsg == l then return end
+	lastmsg = l
 	if not servers[currentServer][t..'LogChannel'] then
 		print 'unknown discord log type'
 	else
