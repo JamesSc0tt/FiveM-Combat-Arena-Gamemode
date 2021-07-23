@@ -72,8 +72,21 @@ AddEventHandler('fca-lobby:reset', function()
 end)
 
 local bypass_playlimits = {
-
 }
+
+AddEventHandler('playerDropped', function(reason)
+	local source = source
+	if lobbyInfo.lobby_active then
+		for k, v in pairs(lobbyInfo.players) do
+			for key, value in pairs(v) do
+				if value[1] == source then
+					print('Need to remove '..source..' from '..k..' lobby.')
+					lobbyInfo.players[k][key] = nil
+				end
+			end
+		end
+	end
+end)
 
 
 function allLobbyMembersActive()
@@ -82,6 +95,8 @@ function allLobbyMembersActive()
 		if GetPlayerPing(v[1]) <= 0 then
 			print(v[1]..' is not active in lobby!')
 			active = false
+		else
+			print(v[1]..' is active in the lobby!')
 		end
 	end
 	return active
@@ -140,8 +155,10 @@ AddEventHandler('fca-lobby:register', function()
 		end
 	else
 		-- check lobby is not empty
-		if not allLobbyMembersActive() then
+		if not allLobbyMembersActive() or #lobbyInfo.players.lobby <= 0 then
 			-- someone has left, reset
+			-- lobby empty?
+			print('lobby member missing?? empty lobby??')
 			exports['fca-round']:endRound()
 		else
 			-- not first player in lobby :) 
