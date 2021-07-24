@@ -30,6 +30,10 @@ RegisterCommand('xyz', function()
 	TriggerEvent('chat:addMessage', 'Z: '..xyz.z)
 end)
 
+function isRoundActive()
+	return round_active
+end
+
 Citizen.CreateThread(function()
 	while true do Citizen.Wait(0)
 		if round_active then
@@ -176,7 +180,7 @@ end
 RegisterNetEvent('fca-round:start')
 AddEventHandler('fca-round:start', function(items)
 	print'fca-round:start'
-
+	round_active = true
 	-- respawn ped
 	TriggerEvent('fsn_inventory:items:emptyinv')
 	SetEntityCoordsNoOffset(GetPlayerPed(-1), GetEntityCoords(GetPlayerPed(-1)), false, false, false, true)
@@ -218,6 +222,7 @@ end)
 RegisterNetEvent('fca-round:loading')
 AddEventHandler('fca-round:loading', function(map)
 	print 'fca-round:loading'
+	TriggerEvent('fca-spectate:reset')
 	active_map = map
 	local map = mapdata[map]
 	--DoScreenFadeOut(1000)
