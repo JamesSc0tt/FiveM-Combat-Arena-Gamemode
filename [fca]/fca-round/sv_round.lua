@@ -35,17 +35,53 @@ function sendLoadout(player)
 		TriggerClientEvent('FeedM:showNotification', -1, 'You got loadout: ~b~'..l.name..'~w~!')
 	end
 end
-
-RegisterNetEvent('baseevents:onPlayerKilled')
-AddEventHandler('baseevents:onPlayerKilled', function(player, killer)
-	for k,v in pairs(killer) do
-		print(tostring(k)..' => '..tostring(v))
+RegisterNetEvent('fca-round:death')
+AddEventHandler('fca-round:death', function(died, killer)
+	if not round_active then return end
+	print 'gotdeath'
+	-- insert kill to team if TDM
+	for key, ply in pairs(round_data.players) do 
+		if ply.player == died then
+			print('Adding death to player '..GetPlayerName(ply.player))
+			round_data.players[key]['deaths'] = round_data.players[key]['deaths'] + 1
+			print(GetPlayerName(ply.player)..' now has '..round_data.players[key]['deaths']..' deaths')
+			if lobby_data.gamemodes[lobby_data.gamemode][1] == 'br' then
+				round_data.players[key]['alive'] = false
+				print('[br] '..GetPlayerName(ply.player)..' is now out of the game, dead')
+			end
+		end
 	end
-end)
 
-RegisterNetEvent('baseevents:onPlayerDied')
-AddEventHandler('baseevents:onPlayerDied', function(killedBy, pos)
-	print(killedBy)
+	if killer then
+		for key, ply in pairs(round_data.players) do
+			if ply.player == killer and ply.player ~= died then
+				-- killer and did not kill selves
+				print('Adding kill to player '..GetPlayerName(ply.player))
+				round_data.players[key]['kills'] = round_data.players[key]['kills'] + 1
+				print(GetPlayerName(ply.player)..' now has '..round_data.players[key]['kills']..' kills')
+			end
+		end
+	end
+
+	-- do gamemode maths
+	if lobby_data.gamemodes[lobby_data.gamemode][1] == 'tdm' then
+
+	end
+
+	local end_round = false
+	local win_data = {}
+	-- check if anybody is a winner
+
+	if end_round then
+		-- someone has won?
+	else
+		-- send respawn unless br
+		if lobby_data.gamemodes[lobby_data.gamemode][1] ~= 'br' then
+
+		else	
+			TriggerEvent('fca-round:setSpectate', died) -- put into spectate mode if in battle royale
+		end
+	end
 end)
 
 AddEventHandler('playerDropped', function (reason)
@@ -61,18 +97,35 @@ AddEventHandler('playerDropped', function (reason)
 		-- if was last player or under 2 players
 
 		if lobby_data.gamemodes[lobby_data.gamemode][1] == 'tdm' then -- gamemode specific
-
+			local count = {}
+			for k,v in pairs(round_data.players) do
+				if not count[v.team] then
+					count[v.team] = 1
+				else
+					count[v.team] = count[v.team] + 1
+				end
+			end
+			for k,v in pairs(count) do
+				if v <= 0 then
+					print('not enough players, '..k..' team have forfeited')
+				end
+			end
 		end
 		if lobby_data.gamemodes[lobby_data.gamemode][1] == 'dm' then
-
+			if #round_data.players < 2 then
+				print('not enough players, need to forfeit')
+			end
 		end
 		if lobby_data.gamemodes[lobby_data.gamemode][1] == 'br' then
-
+			if #round_data.players < 2 then
+				print('not enough players, need to forfeit')
+			end
 		end
 	end
 end)
 
-RegisterNetEvent('fca-round:start', function(lobby)
+RegisterNetEvent('fca-round:start')
+AddEventHandler('fca-round:start', function(lobby)
 	print 'fca-round:start'
 	lobby_data = lobby -- reset at start of each round
 	local gm = lobby.gamemodes[lobby.gamemode][1]
@@ -84,36 +137,28 @@ RegisterNetEvent('fca-round:start', function(lobby)
 	print('Random loadout: '..loadouts[round_data.loadout].name)
 
 	if gm == 'tdm' then
-		round_data.teams = {
-			kills = {
-				[1] = 0,
-				[2] = 0,
-			},
-			players = {
-				[1] = {},
-				[2] = {},
-			}
-		}
 		local count = 0
 		round_data.players = {}
 		for k,v in pairs(lobby.players.active) do
-			for k,v in pairs(lobby.players.active) do
-				table.insert(round_data.players, #round_data.players+1, {
-					player = v[1]
-				})
-				print('[tdm] adding '..v[1]..' to round players')
-			end
-			count = count + 1
+			table.insert(round_data.players, #round_data.players+1, {
+				player = v[1], 
+				kills = 0,
+				deaths = 0
+			})
+			print('[tdm] adding '..v[1]..' to round players')
+		end
+		-- sorting hat for teams
+		for k,v in pairs(round_data.players) do
+			count = count+1
 			if (count % 2 == 0) then
-				print(v[1]..' needs to be in team 1, adding')
-				table.insert(lobby.players, #lobby.players+1, {
-					player = v[1],
-					kills = 0,
-					deaths = 0,
-				})
+				-- team 1
+				round_data.players[k]['team'] = 'Blue Team'
+				
 			else
-				print(v[1]..' needs to be in team 2, adding')
+				-- team 2
+				round_data.players[k]['team'] = 'Red Team'
 			end
+			print('[tdm] Added player '..GetPlayerName(round_data.players[k].player)..' to team: '..round_data.players[k]['team'])
 		end
 	end
 	if gm == 'dm' then
