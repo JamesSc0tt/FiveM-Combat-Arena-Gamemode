@@ -22,12 +22,16 @@ local lobbyInfo = {
 		-- {name, image, votes}
 		{'Bolingbroke Penitentiary', 'bolingbroke.jpg', {}},
 		{'Humane Labs', 'humanelabs.png', {}},
+		{'Sewage Plant', 'sewage.jpg', {}},
+		{'Mirror Park', 'rotunda.png', {}},
+		{'Merryweather Dock', 'naval.png', {}},
+		{'Fort Zancudo', 'zancudo.png', {}},
 	},
 	gamemodes = {
 		-- {shortname, name, description, votes}
-		{'tdm', 'Team Deathmatch', 'tdm.jpg', 'Players are split evenly randomly. First to 45 kills.', {}},
-		{'dm', 'Deathmatch', 'tdm.jpg', 'All players vs eachother, first to 20 kills.', {}},
-		{'br', 'Battle Royal', 'tdm.jpg', 'Last man standing, all players have 1 life and last man standing wins.', {}},
+		{'tdm', 'Team Deathmatch', 'tdm.jpg', 'First team to 80 kills wins!', {}},
+		{'dm', 'Deathmatch', 'dm.jpg', 'First player to 40 kills wins!', {}},
+		{'br', 'Battle Royale', 'br.jpg', 'Last man standing wins!', {}},
 	},
 
 	players = {
