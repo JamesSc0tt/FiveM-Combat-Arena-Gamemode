@@ -1,5 +1,5 @@
-local TDM_REQUIRED_KILLS = 5
-local DM_REQUIRED_KILLS = 5
+local TDM_REQUIRED_KILLS = 80
+local DM_REQUIRED_KILLS = 40
 
 local seconds = 0
 local round_start = 0
@@ -190,17 +190,20 @@ AddEventHandler('playerDropped', function (reason)
 			for k,v in pairs(count) do
 				if v <= 0 then
 					print('not enough players, '..k..' team have forfeited')
+					endRound()
 				end
 			end
 		end
 		if lobby_data.gamemodes[lobby_data.gamemode][1] == 'dm' then
 			if #round_data.players < 2 then
 				print('not enough players, need to forfeit')
+					endRound()
 			end
 		end
 		if lobby_data.gamemodes[lobby_data.gamemode][1] == 'br' then
 			if #round_data.players < 2 then
 				print('not enough players, need to forfeit')
+				endRound()
 			end
 		end
 	end
@@ -359,6 +362,7 @@ Citizen.CreateThread(function()
 		if round_active then
 			if round_timeout == seconds then
 				TriggerClientEvent('FeedM:showNotification', -1, '~r~END:~w~ The game lasted more than 30 minutes.')
+				print('The game lasted more than 30 minutes, it was ended.')
 				endRound()
 			end
 		end
