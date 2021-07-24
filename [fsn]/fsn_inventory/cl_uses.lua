@@ -26,7 +26,70 @@ itemUses = {
 	["painkillers"] = {
 		takeItem = true,
 		use = function(item)
-			TriggerEvent('mythic_hospital:client:UsePainKiller', 2)
+			TriggerEvent("mythic_progbar:client:progress", {
+		        name = "firstaid_action",
+		        duration = 3000,
+		        label = "Taking Painkillers",
+		        useWhileDead = false,
+		        canCancel = true,
+		        controlDisables = {
+		            disableMovement = false,
+		            disableCarMovement = false,
+		            disableMouse = false,
+		            disableCombat = true,
+		        },
+		        animation = {
+		            animDict = "mp_suicide",
+		            anim = "pill",
+		            flags = 49,
+		        },
+		        prop = {
+		            model = "prop_cs_pills",
+		            bone = 58866,
+		            coords = { x = 0.1, y = 0.0, z = 0.001 },
+		            rotation = { x = -60.0, y = 0.0, z = 0.0 },
+		        },
+		    }, function(status)
+		        if not status then
+		            TriggerEvent('bonefive:client:RemoveBleed')
+		            TriggerEvent('bonefive:client:FieldTreatBleed')
+		        end
+		    end)
+		end
+	},
+	["oxy"] = {
+		takeItem = true,
+		use = function ()
+			TriggerEvent("mythic_progbar:client:progress", {
+        		name = "firstaid_action",
+		        duration = 20000,
+		        label = "Taking Oxy",
+		        useWhileDead = false,
+		        canCancel = true,
+		        controlDisables = {
+		            disableMovement = false,
+		            disableCarMovement = false,
+		            disableMouse = false,
+		            disableCombat = true,
+		        },
+		        animation = {
+		            animDict = "mp_suicide",
+		            anim = "pill",
+		            flags = 49,
+		        },
+		        prop = {
+		            model = "prop_cs_pills",
+		            bone = 58866,
+		            coords = { x = 0.1, y = 0.0, z = 0.001 },
+		            rotation = { x = -60.0, y = 0.0, z = 0.0 },
+		        },
+		    }, function(status)
+		        if not status then
+					SetEntityHealth(PlayerPedId(), GetEntityMaxHealth(PlayerPedId()))
+		            TriggerEvent('bonefive:client:FieldTreatLimbs')
+		            TriggerEvent('bonefive:client:ResetLimbs')
+		        end
+		    end)
 		end
 	},
 	["morphine"] = {
@@ -38,21 +101,35 @@ itemUses = {
 	["bandage"] = {
 		takeItem = true,
 		use = function(item)
-			TriggerEvent('mythic_hospital:client:RemoveBleed')
-			TriggerEvent('fsn_ems:ad:stopBleeding')
-			TriggerEvent('fsn_evidence:ped:addState', 'Has bandage', 'UPPER_BODY', 20)
-			if GetEntityHealth(GetPlayerPed(-1)) < 131 then
-				TriggerEvent('fsn_inventory:item:take', 'bandage', 1)
-				while ( not HasAnimDictLoaded( "oddjobs@assassinate@guard" ) ) do
-					RequestAnimDict( "oddjobs@assassinate@guard" )
-					Citizen.Wait( 5 )
-				end
-				TaskPlayAnim(GetPlayerPed(-1), "oddjobs@assassinate@guard", "unarmed_fold_arms", 8.0, 1.0, 2500, 2, 0, 0, 0, 0 )  
-				Citizen.Wait(1500)
-				SetEntityHealth(GetPlayerPed(-1), GetEntityHealth(GetPlayerPed(-1))+15)
-			else
-				TriggerEvent('fsn_notify:displayNotification', 'You don\'t need to use a bandage!<br>Visit an EMS personnel or a hospital to heal more.', 'centerLeft', 3500, 'error')
-			end
+			TriggerEvent("mythic_progbar:client:progress", {
+		        name = "firstaid_action",
+		        duration = 5000,
+		        label = "Using Bandage",
+		        useWhileDead = false,
+		        canCancel = true,
+		        controlDisables = {
+		            disableMovement = false,
+		            disableCarMovement = false,
+		            disableMouse = false,
+		            disableCombat = true,
+		        },
+		        animation = {
+		            animDict = "missheistdockssetup1clipboard@idle_a",
+		            anim = "idle_a",
+		            flags = 49,
+		        },
+		        prop = {
+		            model = "prop_paper_bag_small",
+		        }
+		    }, function(status)
+		        if not status then
+					local maxHealth = GetEntityMaxHealth(PlayerPedId())
+					local health = GetEntityHealth(PlayerPedId())
+					local newHealth = math.min(maxHealth, math.floor(health + maxHealth / 16))
+		            SetEntityHealth(PlayerPedId(), newHealth)
+		            TriggerEvent('bonefive:client:ReduceBleed')
+		        end
+		    end)
 		end
 	},
 	["repair_kit"] = {
@@ -266,9 +343,31 @@ itemUses = {
 		end
 	},
 	['armor'] = {
-		takeItem = false,
+		takeItem = true,
 		use = function(item)
-			TriggerEvent('fsn_inventory:useArmor')
+			print'armor'
+			TriggerEvent("mythic_progbar:client:progress", {
+		        name = "firstaid_action",
+		        duration = 3000,
+		        label = "Taking Painkillers",
+		        useWhileDead = false,
+		        canCancel = true,
+		        controlDisables = {
+		            disableMovement = false,
+		            disableCarMovement = false,
+		            disableMouse = false,
+		            disableCombat = true,
+		        },
+		        animation = {
+		            animDict = "oddjobs@basejump@ig_15",
+		            anim = "puton_parachute",
+		            flags = 49,
+		        },
+		    }, function(status)
+		        if not status then
+		        	SetPedArmour(GetPlayerPed(-1), 100)
+		        end
+		    end)
 		end
 	},
 }

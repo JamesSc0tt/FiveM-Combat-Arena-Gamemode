@@ -22,6 +22,13 @@ presetItems = {
 			weight = 0.4
 		},
 	},
+	["oxy"] = {
+		index = 'oxy',
+		name = 'Oxy',
+		data = {
+			weight = 0.4
+		},
+	},
 	["morphine"] = {
 		index = 'morphine',
 		name = 'Morphine',

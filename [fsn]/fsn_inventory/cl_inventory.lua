@@ -27,7 +27,7 @@ end
 --[[
 	Exports
 ]]--
-local max_weight = 40
+local max_weight = 15000
 local secondInventory_limits = {
 	["ply"] = 40,
 	["trunk"] = 40,

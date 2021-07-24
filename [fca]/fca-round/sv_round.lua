@@ -22,9 +22,65 @@ local loadouts = {
 			{'weapon_combatpistol', 1},
 			{'armor', 2},
 			{'bandage', 10},
-			{'painkillers', 5}
+			{'painkillers', 5},
+			{'oxy', 5}
 		},
-	}
+	},
+	{
+		name = 'PISTOL',
+		items = {
+			{'weapon_pistol', 1},
+			{'ammo_pistol', 5},
+			{'armor', 2},
+			{'bandage', 10},
+			{'painkillers', 5},
+			{'oxy', 5}
+		},
+	},
+	{
+		name = 'SMG',
+		items = {
+			{'weapon_smg', 1},
+			{'ammo_smg', 5},
+			{'armor', 2},
+			{'bandage', 10},
+			{'painkillers', 5},
+			{'oxy', 5}
+		},
+	},
+	{
+		name = 'PUMP SHOTGUN',
+		items = {
+			{'weapon_pumpshotgun', 1},
+			{'ammo_shotgun', 5},
+			{'armor', 2},
+			{'bandage', 10},
+			{'painkillers', 5},
+			{'oxy', 5}
+		},
+	},
+	{
+		name = 'ASSAULT RIFLE',
+		items = {
+			{'weapon_assaultrifle', 1},
+			{'ammo_rifle', 5},
+			{'armor', 2},
+			{'bandage', 10},
+			{'painkillers', 5},
+			{'oxy', 5}
+		},
+	},
+	{
+		name = 'CARBINE RIFLE',
+		items = {
+			{'weapon_carbinerifle', 1},
+			{'ammo_rifle', 5},
+			{'armor', 2},
+			{'bandage', 10},
+			{'painkillers', 5},
+			{'oxy', 5}
+		},
+	},
 }
 
 function sendLoadout(player)
@@ -35,7 +91,7 @@ function sendLoadout(player)
 		for key, item in pairs(l.items) do
 			TriggerClientEvent('fsn_inventory:item:add', player, item[1], item[2])
 		end
-		TriggerClientEvent('FeedM:showNotification', -1, 'You got loadout: ~b~'..l.name..'~w~!')
+		TriggerClientEvent('FeedM:showNotification', player, 'You got loadout: ~b~'..l.name..'~w~!')
 	end
 end
 RegisterNetEvent('fca-round:death')
@@ -186,8 +242,10 @@ AddEventHandler('playerDropped', function (reason)
 				else
 					count[v.team] = count[v.team] + 1
 				end
+				print(v.team..' has '..count[v.team]..' left!')
 			end
 			for k,v in pairs(count) do
+				print(k..' has '..v..' left!')
 				if v <= 0 then
 					print('not enough players, '..k..' team have forfeited')
 					endRound()
