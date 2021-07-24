@@ -51,53 +51,23 @@ end)
 AddEventHandler('playerDropped', function (reason)
 	-- remove from active lobby / players
 	local pname = GetPlayerName(source)
-	if round_active then
-		if lobby_data.gamemodes[lobby_data.gamemode][1] == 'tdm' then
-			for teamkey,teamtable in pairs(round_data.teams.players) do
-				for playerkey, playertable in pairs(teamtable) do
-					if playertable[1] == source then
-						print('[tdm] Player '..source..' left the game')
-						TriggerClientEvent('FeedM:showNotification', -1, '~r~'..pname..' left the game.')
-						exports['fca-discord']:AddDiscordLog('player',  '**'..pname..'** removed from team **'..teamkey..'** due to leaving.')
-						round_data.teams.players[teamkey][playerkey] = nil
-						if #round_data.teams.players[teamkey] <= 0 then
-							print('[tdm] Round forfeit, everybody in team '..teamkey..' left!')
-							TriggerClientEvent('FeedM:showNotification', -1, 'Team '..key..' forfeited, everybody left the game')
-							exports['fca-discord']:AddDiscordLog('player', 'Team '..key..' forfeited, everybody left the game')
-							endRound()
-						end
-					end
-				end
+	if round_active or round_pending then
+		for playerkey,playertable in pairs(round_data.players) do
+			if playertable.player == source then
+				print('[tdm] '..source..' has left the game, removing from active players.')
+				round_data.players[playerkey] = nil
 			end
+		end
+		-- if was last player or under 2 players
+
+		if lobby_data.gamemodes[lobby_data.gamemode][1] == 'tdm' then -- gamemode specific
+
 		end
 		if lobby_data.gamemodes[lobby_data.gamemode][1] == 'dm' then
-			for playerkey,playertable in pairs(round_data.players) do
-				if playertable[1] == source then
-					print('[dm] '..source..' left the game')
-					TriggerClientEvent('FeedM:showNotification', -1, '~r~'..pname..' left the game.')
-					exports['fca-discord']:AddDiscordLog('player',  '**'..pname..'** left the game.')
-					round_data.players[playerkey] = nil
-					if #round_data.players < 2 then
-						print('[dm] Cannot continue with only one player.')
-						exports['fca-discord']:AddDiscordLog('player', 'Game ended, this gamemode can not be played with only 1 player.')
-						endRound()
-					end
-				end
-			end
+
 		end
 		if lobby_data.gamemodes[lobby_data.gamemode][1] == 'br' then
-			for playerkey,playertable in pairs(round_data.players) do
-				if playertable[1] == source then
-					print('[br] '..source..' left the game')
-					TriggerClientEvent('FeedM:showNotification', -1, '~r~'..pname..' left the game.')
-					exports['fca-discord']:AddDiscordLog('player',  '**'..pname..'** left the game.')
-					round_data.players[playerkey] = nil
-					if #round_data.players < 2 then
-						-- winner thing here!
-						print('[br] Only one player left, immediate win')
-					end
-				end
-			end
+
 		end
 	end
 end)
@@ -125,18 +95,24 @@ RegisterNetEvent('fca-round:start', function(lobby)
 			}
 		}
 		local count = 0
-		round_data.players = lobby.players.active
+		round_data.players = {}
 		for k,v in pairs(lobby.players.active) do
+			for k,v in pairs(lobby.players.active) do
+				table.insert(round_data.players, #round_data.players+1, {
+					player = v[1]
+				})
+				print('[tdm] adding '..v[1]..' to round players')
+			end
 			count = count + 1
 			if (count % 2 == 0) then
-				print(v[1]..' needs to be in team 1')
+				print(v[1]..' needs to be in team 1, adding')
 				table.insert(lobby.players, #lobby.players+1, {
 					player = v[1],
 					kills = 0,
 					deaths = 0,
 				})
 			else
-				print(v[1]..' needs to be in team 2')
+				print(v[1]..' needs to be in team 2, adding')
 			end
 		end
 	end
@@ -171,6 +147,16 @@ RegisterNetEvent('fca-round:start', function(lobby)
 		print('sending fca-round:loading to '..v[1])
 		TriggerClientEvent('fca-round:loading', v[1], map) -- tell the user to hide lobby interface and start loading
 	end
+end)
+
+RegisterNetEvent('fca-round:setSpectate')
+AddEventHandler('fca-round:setSpectate', function(ply)
+	if round_active then
+		TriggerClientEvent('fca-spectate:enable', ply, round_data.players)
+		print'sentspectateplayerlist'
+	else
+		print'trying to spectateoutside of round?'
+	end 
 end)
 
 RegisterNetEvent('fca-round:spawned')
