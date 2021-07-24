@@ -45,8 +45,8 @@ AddEventHandler('fca-lobby:ui', function(info)
 			info.gamemodes[k][6] = false
 		end
 	end
-	if not uiActive then
-		-- show ui
+	if info.lobby_active then
+		-- show ui when lobby is active, always
 		uiActive = true
 		SendNUIMessage({
 			display = true,
