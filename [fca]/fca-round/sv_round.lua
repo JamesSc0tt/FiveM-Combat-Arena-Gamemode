@@ -214,6 +214,7 @@ function endRound()
 	round_active = false
 	TriggerEvent('fca-lobby:reset')
 	TriggerClientEvent('fca-round:end', -1)
+	TriggerClientEvent('fca-spectate:reset', -1)
 end
 
 RegisterCommand("reset_lobby", function(source)
