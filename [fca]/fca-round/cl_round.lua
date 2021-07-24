@@ -175,12 +175,44 @@ function ReSpawn()
 		end
 	end
 
-	-- reset player
-	TriggerEvent('FeedM:showNotification', 'Waiting for other players to spawn...')
-	
+	-- reset player	
+	if round_active then
+		SetEntityAlpha(PlayerPedId(), 51, false)
+		Citizen.Wait(100)
+		SetEntityAlpha(PlayerPedId(), 255, false)
+		Citizen.Wait(100)
+		SetEntityAlpha(PlayerPedId(), 51, false)
+		Citizen.Wait(100)
+		SetEntityAlpha(PlayerPedId(), 255, false)
+		Citizen.Wait(100)
+		SetEntityAlpha(PlayerPedId(), 51, false)
+		Citizen.Wait(100)
+		SetEntityAlpha(PlayerPedId(), 255, false)
 
+		SetEntityCoordsNoOffset(GetPlayerPed(-1), GetEntityCoords(GetPlayerPed(-1)), false, false, false, true)
+		NetworkResurrectLocalPlayer(GetEntityCoords(GetPlayerPed(-1)), GetEntityHeading(GetPlayerPed(-1)), true, true, false)
+		ClearPedTasksImmediately(GetPlayerPed(-1))
+		RemoveAllPedWeapons(GetPlayerPed(-1))
+		ClearPlayerWantedLevel(PlayerId())
+
+		NetworkSetFriendlyFireOption(true)
+	    SetCanAttackFriendly(GetPlayerPed(-1), true, true)
+
+		SetEntityInvincible(GetPlayerPed(-1), false)
+		SetEntityAlpha(PlayerPedId(), 255, false)
+		SetEntityMaxHealth(GetPlayerPed(-1), 200)
+		SetEntityHealth(GetPlayerPed(-1), 200)
+		SetPedArmour(GetPlayerPed(-1), 100)
+		SetMaxHealthHudDisplay(200)
+
+	end
 	TriggerServerEvent('fca-round:spawned')
 end
+RegisterNetEvent('fca-round:respawn')
+AddEventHandler('fca-round:respawn', function()
+	print'fca-round:respawn'
+	ReSpawn()
+end)
 
 RegisterNetEvent('fca-round:start')
 AddEventHandler('fca-round:start', function(items)
