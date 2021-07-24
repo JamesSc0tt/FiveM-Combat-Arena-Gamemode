@@ -136,7 +136,9 @@ AddEventHandler('fca-lobby:register', function()
 			table.insert(lobbyInfo.players.spectate, {source, GetPlayerName(source), disc, false, false})
 			exports['fca-discord']:AddDiscordLog('player', pname..' is now spectating!')
 
-			TriggerClientEvent('fca-lobby:spectate', source, lobbyInfo.players.active[math.random(1,#lobbyInfo.players.active)][1])
+			TriggerEvent('fca-round:setSpectate', source)
+
+			--TriggerClientEvent('fca-lobby:spectate', source, lobbyInfo.players.active[math.random(1,#lobbyInfo.players.active)][1])
 		else
 			exports['fca-discord']:AddDiscordLog('player', '```A new lobby has started```')
 
