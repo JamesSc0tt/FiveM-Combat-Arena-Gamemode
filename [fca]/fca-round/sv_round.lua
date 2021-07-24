@@ -1,3 +1,6 @@
+local TDM_REQUIRED_KILLS = 5
+local DM_REQUIRED_KILLS = 5
+
 local seconds = 0
 local round_start = 0
 
@@ -40,8 +43,10 @@ AddEventHandler('fca-round:death', function(died, killer)
 	if not round_active then return end
 	print 'gotdeath'
 	-- insert kill to team if TDM
+	local died_data = {}
 	for key, ply in pairs(round_data.players) do 
 		if ply.player == died then
+			died_data = ply
 			print('Adding death to player '..GetPlayerName(ply.player))
 			round_data.players[key]['deaths'] = round_data.players[key]['deaths'] + 1
 			print(GetPlayerName(ply.player)..' now has '..round_data.players[key]['deaths']..' deaths')
@@ -56,28 +61,105 @@ AddEventHandler('fca-round:death', function(died, killer)
 		for key, ply in pairs(round_data.players) do
 			if ply.player == killer and ply.player ~= died then
 				-- killer and did not kill selves
-				print('Adding kill to player '..GetPlayerName(ply.player))
-				round_data.players[key]['kills'] = round_data.players[key]['kills'] + 1
-				print(GetPlayerName(ply.player)..' now has '..round_data.players[key]['kills']..' kills')
+				if died_data.team and died_data.team == ply.team then
+					print('[tdm] Friendly fire! Kill not registered')
+					TriggerClientEvent('FeedM:showNotification', ply.player, '~r~Watch out! You killed a team mate.')
+				else
+					print('Adding kill to player '..GetPlayerName(ply.player))
+					round_data.players[key]['kills'] = round_data.players[key]['kills'] + 1
+					print(GetPlayerName(ply.player)..' now has '..round_data.players[key]['kills']..' kills')
+				end
 			end
 		end
-	end
-
-	-- do gamemode maths
-	if lobby_data.gamemodes[lobby_data.gamemode][1] == 'tdm' then
-
 	end
 
 	local end_round = false
 	local win_data = {}
 	-- check if anybody is a winner
+	-- do gamemode maths
+	if lobby_data.gamemodes[lobby_data.gamemode][1] == 'tdm' then
+		local count = {}
+		for k,v in pairs(round_data.players) do
+			if count[v.team] then
+				count[v.team] = count[v.team] + v.kills
+				print('[tdm] adding '..v.kills..' to team '..v.team)
+			else
+				count[v.team] = v.kills
+				print('[tdm] set '..v.team..' kills to '..v.kills)
+			end
+		end
+
+		for k,v in pairs(count) do
+			print('[tdm] '..k..' has '..v..' out of '..TDM_REQUIRED_KILLS..' required kills')
+			if v >= TDM_REQUIRED_KILLS then
+				print('[tdm] '..k..' has satisfied kill number for win')
+				-- team has won???
+				end_round = true
+				win_data = {
+					winner = k,
+					kills = v,
+					required = TDM_REQUIRED_KILLS
+				}
+			end
+		end
+	end
+	if lobby_data.gamemodes[lobby_data.gamemode][1] == 'dm' then
+		for k,v in pairs(round_data.players) do
+			print('[dm] '..GetPlayerName(v.player)..' has '..v.kills..' out of '..DM_REQUIRED_KILLS..' required kills')
+			if v.kills >= DM_REQUIRED_KILLS then
+				print('[dm] '..GetPlayerName(v.player)..' has satisfied kill number for win')
+				end_round = true
+				win_data = {
+					winner = GetPlayerName(v.player),
+					kills = v.kills,
+					required = DM_REQUIRED_KILLS
+				}
+			end
+		end 
+	end
+	if lobby_data.gamemodes[lobby_data.gamemode][1] == 'br' then
+		local count = 0 
+		local alive = false
+		for k,v in pairs(round_data.players) do
+			if v.alive then
+				alive = v
+				count = count + 1
+			end 
+		end
+		if count <= 1 then
+			print('[br] only '..count..' players alive, deciding winner')
+			end_round = true
+			win_data = {
+				winner = GetPlayerName(alive.player),
+				kills = alive.kills,
+				required = 0
+			}
+		else
+			print('[br] '..count..' players remaining')
+		end
+	end
 
 	if end_round then
 		-- someone has won?
+		print 'the game has been won?'
+		exports['fca-discord']:AddDiscordLog('player', '```The game has ended.\n\nWinner: '..win_data.winner..' with '..win_data.kills..' kills```')
+
+		local endtimenow = GetGameTimer() + 10000
+
+		TriggerClientEvent('fca-misc:text:LG', -1, win_data.winner..' wins!', {0,255,0}, 10)
+		TriggerClientEvent('fca-misc:text:SM', -1, 'With '..win_data.kills..' kills', {255,255,255}, 10)
+
+		while GetGameTimer() <= endtimenow do
+			Citizen.Wait(1)
+		end
+
+		endRound()
 	else
 		-- send respawn unless br
 		if lobby_data.gamemodes[lobby_data.gamemode][1] ~= 'br' then
-
+			print('sending round:respawn to'..died)
+			TriggerClientEvent('fca-round:respawn', died)
+			sendLoadout(died)
 		else	
 			TriggerEvent('fca-round:setSpectate', died) -- put into spectate mode if in battle royale
 		end
@@ -153,7 +235,6 @@ AddEventHandler('fca-round:start', function(lobby)
 			if (count % 2 == 0) then
 				-- team 1
 				round_data.players[k]['team'] = 'Blue Team'
-				
 			else
 				-- team 2
 				round_data.players[k]['team'] = 'Red Team'
@@ -206,6 +287,7 @@ end)
 
 RegisterNetEvent('fca-round:spawned')
 AddEventHandler('fca-round:spawned', function()
+	if not round_pending then return end
 	print 'fca-round:spawned'
 	local pname = GetPlayerName(source)
 
@@ -222,6 +304,7 @@ AddEventHandler('fca-round:spawned', function()
 			TriggerClientEvent('FeedM:showNotification', -1, '~g~START:~w~ 10 seconds...')
 			round_start = seconds + 10
 		else
+			TriggerClientEvent('FeedM:showNotification', source, 'Waiting for other players to spawn...')
 			print(#round_spawned..' players out of '..#lobby_data.players.active..' spawned')
 		end
 	end
@@ -232,6 +315,8 @@ function startRound()
 	round_timeout = seconds + 1800
 	round_pending = false
 	round_active = true
+	 -- loadouts[round_data.loadout].name
+	exports['fca-discord']:AddDiscordLog('player', '```The game has started! Chosen loadout: '..loadouts[round_data.loadout].name..'```')
 	for k,v in pairs(lobby_data.players.active) do
 		print('sending fca-round:start: '..v[1])
 		TriggerClientEvent('fca-round:start', v[1])
