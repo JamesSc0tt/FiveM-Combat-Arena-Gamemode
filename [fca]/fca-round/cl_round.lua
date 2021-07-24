@@ -92,6 +92,7 @@ Citizen.CreateThread(function()
 		local playerPed = GetPlayerPed(-1)
 		local playerLocalisation = GetEntityCoords(playerPed)
 		ClearAreaOfCops(playerLocalisation.x, playerLocalisation.y, playerLocalisation.z, 400.0)
+		SetEveryoneIgnorePlayer(PlayerId(), 1)
 		RemoveWeaponDrops()
 		for i = 1, 12 do
 			EnableDispatchService(i, false)
