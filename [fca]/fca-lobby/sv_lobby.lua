@@ -72,6 +72,7 @@ AddEventHandler('fca-lobby:reset', function()
 end)
 
 local bypass_playlimits = {
+	'discord:163076091634778112'
 }
 
 AddEventHandler('playerDropped', function(reason)
@@ -135,7 +136,7 @@ AddEventHandler('fca-lobby:register', function()
 			table.insert(lobbyInfo.players.spectate, {source, GetPlayerName(source), disc, false, false})
 			exports['fca-discord']:AddDiscordLog('player', pname..' is now spectating!')
 
-			TriggerClientEvent('fca-lobby:spectate', source)
+			TriggerClientEvent('fca-lobby:spectate', source, lobbyInfo.players.active[math.random(1,#lobbyInfo.players.active)][1])
 		else
 			exports['fca-discord']:AddDiscordLog('player', '```A new lobby has started```')
 
