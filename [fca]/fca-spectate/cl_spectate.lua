@@ -24,15 +24,14 @@ function getFirstActivePlayer()
 	local fap = false
 	if spectate_players then
 		for _,v in pairs(spectate_players) do
-			local p = GetPlayerFromServerId(v[1])
-			if p then
-				if NetworkIsPlayerActive(p) then
-					fap = v[1]
-				end
-			end
+			fap = v.player
 		end
 	end
-	return fap
+	if not fap then
+		print'failedtofindfap'
+	else
+		return fap
+	end
 end
 
 function getNextActivePlayer()
@@ -40,11 +39,11 @@ function getNextActivePlayer()
 	local trigger = false
 	if spectate_players then
 		for k,v in pairs(spectate_players) do
-			if v[1] == GetPlayerServerId(spectate_target) then
+			if v.player == GetPlayerServerId(spectate_target) then
 				trigger = true
 			else
-				if trigger and NetworkIsPlayerActive(v[1]) then
-					nap = v[1]
+				if trigger and NetworkIsPlayerActive(v.player) then
+					nap = v.player
 				end
 			end
 		end
@@ -60,12 +59,12 @@ function getLastActivePlayer()
 	local lap = false
 	if spectate_players then
 		for k,v in pairs(spectate_players) do
-			if v[1] == GetPlayerServerId(spectate_target) then 
+			if v.player == GetPlayerServerId(spectate_target) then 
 				if lap and NetworkIsPlayerActive(lap) then
 					return lap
 				end
 			else
-				lap = v[1]
+				lap = v.player
 			end
 		end
 	end
@@ -82,9 +81,21 @@ end)
 RegisterNetEvent('fca-spectate:spectatePlayer')
 AddEventHandler('fca-spectate:spectatePlayer', function(id, coords)
     if coords == nil then return end
+    SetEntityCoords(GetPlayerPed(-1), coords)
+
+
+    RequestCollisionAtCoord(coords)
+	SetEntityCoordsNoOffset(PlayerPedId(), coords, 0, 0, 2.5)
+	FreezeEntityPosition(GetPlayerPed(-1), true)
+
+	while not HasCollisionLoadedAroundEntity(GetPlayerPed(-1)) do
+        Citizen.Wait(1)
+        print'colliding...'
+    end
+
+    FreezeEntityPosition(GetPlayerPed(-1), false)
 
    	DoScreenFadeOut(500)
-
    	SetEntityVisible(GetPlayerPed(-1), false)
    	SetEntityCollision(GetPlayerPed(-1), false, true)
 
