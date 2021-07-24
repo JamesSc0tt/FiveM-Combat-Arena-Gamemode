@@ -29,9 +29,7 @@ Citizen.CreateThread(function()
 
             local lcl = GetPlayerPed(-1)
             local lclname = GetPlayerName(PlayerId())
-
-
-
+            
             for _, id in ipairs(GetActivePlayers()) do
                 if killer == GetPlayerPed(id) then
                     killername = GetPlayerName(id)
