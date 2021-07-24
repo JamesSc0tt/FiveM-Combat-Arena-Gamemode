@@ -15,20 +15,31 @@ local mapdata = {
 		},
 		range = 300.0
 	},
+	[3] = { -- sewage plant
+		center = { x = 1022.693, y = 2342.134, z = 50.56 },
+		range = 300.0
+	},
+	[4] = { -- mirror park
+		center = { x = -2257.686, y = 290.435, z = 177.50 },
+		range = 300.0
+	},
+	[5] = { --merryweather doks
+		center = { x = 534.651, y = -3126.880, z = 10.444 },
+		range = 300.0
+	},
+	[6] = { -- zancudo
+		center = { x = -2078.339, y = 3148.228, z = 37.40 },
+		range = 300.0
+
+	}
 }
 
 local in_area = true
 local left_area = 0
 local ooa_remaining = 30
 
-SetNuiFocus(false)
+--SetNuiFocus(false)
 
-RegisterCommand('xyz', function()
-	local xyz = GetEntityCoords(GetPlayerPed(-1))
-	TriggerEvent('chat:addMessage', 'X: '..xyz.x)
-	TriggerEvent('chat:addMessage', 'Y: '..xyz.y)
-	TriggerEvent('chat:addMessage', 'Z: '..xyz.z)
-end)
 
 function isRoundActive()
 	return round_active
