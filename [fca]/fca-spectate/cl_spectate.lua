@@ -24,7 +24,9 @@ function getFirstActivePlayer()
 	local fap = false
 	if spectate_players then
 		for _,v in pairs(spectate_players) do
-			fap = v.player
+			if not fap then
+				fap = v.player
+			end
 		end
 	end
 	if not fap then
@@ -39,16 +41,25 @@ function getNextActivePlayer()
 	local trigger = false
 	if spectate_players then
 		for k,v in pairs(spectate_players) do
-			if v.player == GetPlayerServerId(spectate_target) then
+			print(v.player)
+			print(spectate_target)
+			if tonumber(v.player) == tonumber(GetPlayerServerId(spectate_target)) then
+				print'current'
 				trigger = true
 			else
-				if trigger and NetworkIsPlayerActive(v.player) then
-					nap = v.player
+				if trigger then
+					if NetworkIsPlayerActive(spectate_target) then
+						print'trigger'
+						nap = v.player
+					else
+						print'notnetactive'
+					end
 				end
 			end
 		end
 	end
 	if nap == false then
+		print'fap'
 		return getFirstActivePlayer()
 	else
 		return nap
@@ -57,18 +68,40 @@ end
 
 function getLastActivePlayer()
 	local lap = false
+	local last = false
+	local trigger = false
 	if spectate_players then
 		for k,v in pairs(spectate_players) do
-			if v.player == GetPlayerServerId(spectate_target) then 
-				if lap and NetworkIsPlayerActive(lap) then
-					return lap
-				end
-			else
+			if trigger then
+				-- catch case
 				lap = v.player
+			elseif tonumber(v.player) == tonumber(GetPlayerServerId(spectate_target)) then
+				lap = last
+				trigger = true
+			else
+				last = v.player
+			end
+			if tonumber(v.player) == tonumber(GetPlayerServerId(spectate_target)) then
+				lap = last
+				trigger = true
+			else
+				if trigger then
+					if NetworkIsPlayerActive(spectate_target) then
+						print'trigger'
+						lap = v.player
+					else
+						print'notnetactive'
+					end
+				end
 			end
 		end
 	end
-	return getFirstActivePlayer()
+	if lap == false then
+		print'fap'
+		return getFirstActivePlayer()
+	else
+		return lap
+	end
 end
 
 
