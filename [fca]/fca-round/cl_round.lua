@@ -60,7 +60,7 @@ Citizen.CreateThread(function()
 				local remaining = left_area + ooa_remaining - seconds
 				if remaining <= 0 then
 					-- kill player
-
+					SetEntityHealth(GetPlayerPed(-1), 0)
 				end
 				DrawMarker(1, mapdata[active_map].center.x,mapdata[active_map].center.y,mapdata[active_map].center.z + 2, 0.0, 0.0, 0.0, 0.0, 180.0, 0.0, mapdata[active_map].range, mapdata[active_map].range, 10000000.0, 255, 128, 0, 50, false, true, 2, nil, nil, false)
 				exports['fca-misc']:drawTxt(0.94, 1.30, 1.0, 1.0, 0.6, "~r~RETURN TO THE PLAY AREA", 255, 255, 255, 255)
@@ -176,6 +176,9 @@ function ReSpawn()
 					break
 				else
 					TriggerEvent('FeedM:showNotification', '~r~This map ('..active_map..') has no preset spawns, this will take longer...')
+					SetEntityCoords(GetPlayerPed(-1), map.center.x, map.center.y, map.center.z)
+					foundSafeCoords, safeCoords = GetSafeCoordForPed(x, y, coords.z, false , 16)
+					SetEntityCoords(GetPlayerPed(-1), safeCoords)
 				end
 			end
 		else
