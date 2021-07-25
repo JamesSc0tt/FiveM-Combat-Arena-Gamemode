@@ -41,7 +41,7 @@ on('playerConnecting', (name, setKickReason, deferrals) => {
     var userId = getUserDiscord(src);
 
     setTimeout(() => {
-        deferrals.update(`Hello ${name}. Checking Discord join status...`)
+        deferrals.update(`Hello ${name}. Checking Discord join status...\nMake sure you are in our discord: combatarena.co`)
         setTimeout(async function() {
             if(userId) {
                 axios(`/guilds/${guild}/members/${userId}`).then((resDis) => {
