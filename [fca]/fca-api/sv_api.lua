@@ -38,3 +38,6 @@ function api_request(endpoint, args, postdata, headers)
 		end, 'GET', {}, headers)
 	end
 end
+
+RegisterServerEvent('fca-api:api_request')
+AddEventHandler('fca-api:api_request', api_request)
