@@ -1,5 +1,5 @@
 local API_URL = 'https://combatarena.co/apiv1'
-local DEBUG_MODE = false
+local DEBUG_MODE = true
 
 function api_request(endpoint, args, postdata, headers)
 	local response = false
@@ -7,36 +7,23 @@ function api_request(endpoint, args, postdata, headers)
 		endpoint = '/'..endpoint
 	end
 	if not headers then
-		headers = {}
+		headers = { ["Content-Type"] = 'application/json' }
 	end
+	postdata['token'] = '62JiTzy3rLAWJuRTdRhtsBfRxjzKnsVnOdtmHBl'
+	for k,v in pairs(postdata) do
+		print(k..' => '..v)
+	end
+	print('---')
+	print(json.encode(postdata))
 	local url = API_URL..endpoint
-	if (postdata) then
-		PerformHttpRequest(url, function(errorCode, resultData, resultHeaders)
-			response['errorCode'] = errorCode
-			response['resultData'] = resultData
-			response['resultHeaders'] = resultHeaders
 
-			if DEBUG_MODE then
-				print('fca-api : response')
-				print(' - errorCode: '..errorCode)
-				print(' - resultData: '..resultData)
-				print(' - resultHeaders: '..resultHeaders)
-			end
-		end, 'POST', postdata, headers)
-	else
-		PerformHttpRequest(url, function(errorCode, resultData, resultHeaders)
-			response['errorCode'] = errorCode
-			response['resultData'] = resultData
-			response['resultHeaders'] = resultHeaders
 
-			if DEBUG_MODE then
-				print('fca-api : response')
-				print(' - errorCode: '..errorCode)
-				print(' - resultData: '..resultData)
-				print(' - resultHeaders: '..resultHeaders)
-			end
-		end, 'GET', {}, headers)
-	end
+	PerformHttpRequest(url, function(errorCode, resultData, resultHeaders)
+        print(errorCode)
+        print(resultData)
+        print(resultHeaders)
+    end, 'POST', json.encode(postdata), {["Content-Type"] = "application/json"})
+
 end
 
 RegisterServerEvent('fca-api:api_request')

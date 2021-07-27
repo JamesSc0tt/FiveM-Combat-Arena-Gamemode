@@ -117,7 +117,7 @@ AddEventHandler('fca-round:death', function(died, killer)
 				register = 'deaths',
 				gamemode = lobby_data.gamemodes[lobby_data.gamemode][1],
 				amount = 1,
-			}, {})
+			}, false)
 		end
 	end
 
@@ -139,7 +139,7 @@ AddEventHandler('fca-round:death', function(died, killer)
 						register = 'kills',
 						gamemode = lobby_data.gamemodes[lobby_data.gamemode][1],
 						amount = 1,
-					}, {})
+					}, false)
 				end
 			end
 		end
@@ -181,7 +181,14 @@ AddEventHandler('fca-round:death', function(died, killer)
 							register = 'wins',
 							gamemode = lobby_data.gamemodes[lobby_data.gamemode][1],
 							amount = 1,
-						}, {})
+						}, false)
+					else
+						exports['fca-api']:api_request('/register.php', {}, {
+							discord = exports['fca-spawn']:GetPlayerDiscord(ply.player),
+							register = 'losses',
+							gamemode = lobby_data.gamemodes[lobby_data.gamemode][1],
+							amount = 1,
+						}, false)
 					end
 				end
 			end
@@ -196,6 +203,7 @@ AddEventHandler('fca-round:death', function(died, killer)
 				win_data = {
 					winner = GetPlayerName(v.player),
 					kills = v.kills,
+					player = v.player,
 					required = DM_REQUIRED_KILLS
 				}
 
@@ -205,9 +213,20 @@ AddEventHandler('fca-round:death', function(died, killer)
 					register = 'wins',
 					gamemode = lobby_data.gamemodes[lobby_data.gamemode][1],
 					amount = 1,
-				}, {})
+				}, false)
 			end
 		end 
+
+		for k,v in pairs(round_data.players) do
+			if v.player ~= win_data.player then
+				exports['fca-api']:api_request('/register.php', {}, {
+					discord = exports['fca-spawn']:GetPlayerDiscord(v.player),
+					register = 'losses',
+					gamemode = lobby_data.gamemodes[lobby_data.gamemode][1],
+					amount = 1,
+				}, false)
+			end
+		end
 	end
 	if lobby_data.gamemodes[lobby_data.gamemode][1] == 'br' then
 		local count = 0 
@@ -224,6 +243,7 @@ AddEventHandler('fca-round:death', function(died, killer)
 			win_data = {
 				winner = GetPlayerName(alive.player),
 				kills = alive.kills,
+				player = alive.player,
 				required = 0
 			}
 			
@@ -233,8 +253,19 @@ AddEventHandler('fca-round:death', function(died, killer)
 				register = 'wins',
 				gamemode = lobby_data.gamemodes[lobby_data.gamemode][1],
 				amount = 1,
-			}, {})
-1		else
+			}, false)
+
+			for k,v in pairs(round_data.players) do
+				if v.player ~= win_data.player then
+					exports['fca-api']:api_request('/register.php', {}, {
+						discord = exports['fca-spawn']:GetPlayerDiscord(v.player),
+						register = 'losses',
+						gamemode = lobby_data.gamemodes[lobby_data.gamemode][1],
+						amount = 1,
+					}, false)
+				end
+			end
+		else
 			print('[br] '..count..' players remaining')
 		end
 	end
