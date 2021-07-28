@@ -174,21 +174,23 @@ AddEventHandler('fca-round:death', function(died, killer)
 				}
 
 				-- api endpoint stuff
-				for k,ply in pairs(round_data.players) do
-					if ply.team == win_data.winner then
-						exports['fca-api']:api_request('/register.php', {}, {
-							discord = exports['fca-spawn']:GetPlayerDiscord(ply.player),
-							register = 'wins',
-							gamemode = lobby_data.gamemodes[lobby_data.gamemode][1],
-							amount = 1,
-						}, false)
-					else
-						exports['fca-api']:api_request('/register.php', {}, {
-							discord = exports['fca-spawn']:GetPlayerDiscord(ply.player),
-							register = 'losses',
-							gamemode = lobby_data.gamemodes[lobby_data.gamemode][1],
-							amount = 1,
-						}, false)
+				if end_round then
+					for k,ply in pairs(round_data.players) do
+						if ply.team == win_data.winner then
+							exports['fca-api']:api_request('/register.php', {}, {
+								discord = exports['fca-spawn']:GetPlayerDiscord(ply.player),
+								register = 'wins',
+								gamemode = lobby_data.gamemodes[lobby_data.gamemode][1],
+								amount = 1,
+							}, false)
+						else
+							exports['fca-api']:api_request('/register.php', {}, {
+								discord = exports['fca-spawn']:GetPlayerDiscord(ply.player),
+								register = 'losses',
+								gamemode = lobby_data.gamemodes[lobby_data.gamemode][1],
+								amount = 1,
+							}, false)
+						end
 					end
 				end
 			end
@@ -206,27 +208,27 @@ AddEventHandler('fca-round:death', function(died, killer)
 					player = v.player,
 					required = DM_REQUIRED_KILLS
 				}
-
-				-- api endpoint stuff
-				exports['fca-api']:api_request('/register.php', {}, {
-					discord = exports['fca-spawn']:GetPlayerDiscord(v.player),
-					register = 'wins',
-					gamemode = lobby_data.gamemodes[lobby_data.gamemode][1],
-					amount = 1,
-				}, false)
+				if end_round then 
+					for k,player in pairs(round_data.players) do
+						if player.player ~= win_data.player then
+							exports['fca-api']:api_request('/register.php', {}, {
+								discord = exports['fca-spawn']:GetPlayerDiscord(player.player),
+								register = 'losses',
+								gamemode = lobby_data.gamemodes[lobby_data.gamemode][1],
+								amount = 1,
+							}, false)
+						else
+							exports['fca-api']:api_request('/register.php', {}, {
+								discord = exports['fca-spawn']:GetPlayerDiscord(player.player),
+								register = 'wins',
+								gamemode = lobby_data.gamemodes[lobby_data.gamemode][1],
+								amount = 1,
+							}, false)	
+						end
+					end
+				end
 			end
 		end 
-
-		for k,v in pairs(round_data.players) do
-			if v.player ~= win_data.player then
-				exports['fca-api']:api_request('/register.php', {}, {
-					discord = exports['fca-spawn']:GetPlayerDiscord(v.player),
-					register = 'losses',
-					gamemode = lobby_data.gamemodes[lobby_data.gamemode][1],
-					amount = 1,
-				}, false)
-			end
-		end
 	end
 	if lobby_data.gamemodes[lobby_data.gamemode][1] == 'br' then
 		local count = 0 
@@ -247,22 +249,24 @@ AddEventHandler('fca-round:death', function(died, killer)
 				required = 0
 			}
 			
-			-- api endpoint stuff
-			exports['fca-api']:api_request('/register.php', {}, {
-				discord = exports['fca-spawn']:GetPlayerDiscord(alive.player),
-				register = 'wins',
-				gamemode = lobby_data.gamemodes[lobby_data.gamemode][1],
-				amount = 1,
-			}, false)
-
-			for k,v in pairs(round_data.players) do
-				if v.player ~= win_data.player then
-					exports['fca-api']:api_request('/register.php', {}, {
-						discord = exports['fca-spawn']:GetPlayerDiscord(v.player),
-						register = 'losses',
-						gamemode = lobby_data.gamemodes[lobby_data.gamemode][1],
-						amount = 1,
-					}, false)
+			if end_round then 
+				-- api endpoint stuff
+				for k,v in pairs(round_data.players) do
+					if v.player ~= win_data.player then
+						exports['fca-api']:api_request('/register.php', {}, {
+							discord = exports['fca-spawn']:GetPlayerDiscord(v.player),
+							register = 'losses',
+							gamemode = lobby_data.gamemodes[lobby_data.gamemode][1],
+							amount = 1,
+						}, false)
+					else
+						exports['fca-api']:api_request('/register.php', {}, {
+							discord = exports['fca-spawn']:GetPlayerDiscord(alive.player),
+							register = 'wins',
+							gamemode = lobby_data.gamemodes[lobby_data.gamemode][1],
+							amount = 1,
+						}, false)
+					end
 				end
 			end
 		else
