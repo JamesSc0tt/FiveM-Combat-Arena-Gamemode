@@ -33,3 +33,60 @@ function AddDiscordLog(t, l, src)
 		PerformHttpRequest(servers[currentServer][t..'LogChannel'], function(err, text, headers) end, 'POST', json.encode({username = 'FiveM Combat Arena - Server #1', content = l}), { ['Content-Type'] = 'application/json' })
 	end	
 end
+
+Info = {
+    botToken = "Bot " .. "ODY3NDA4Mjk5Nzc0ODM2NzM2.YPgq7g.uGjszZzIp5CUjbZ1lmJ4pT-WSME",
+    guildId = "867360466048647178",
+}
+
+function request(method, endpoint, jsondata)
+    local data = nil
+    PerformHttpRequest("https://discordapp.com/api/" .. endpoint, function(errorCode, resultData, resultHeaders)
+        data = {data = resultData, code = errorCode, headers = resultHeaders}
+    end, method, #jsondata > 0 and json.encode(jsondata) or "", {["Content-Type"] = "application/json", ["Authorization"] = Info.botToken})
+    
+    while data == nil do
+        Citizen.Wait(0)
+    end
+    
+    return data
+end
+function roleCheck(user, role, alerts)
+    local userId = nil
+    for _, id in ipairs(GetPlayerIdentifiers(user)) do
+        if string.match(id, "discord:") then
+            userId = string.gsub(id, "discord:", "")
+            if alerts then print("^6[fca-discord]^0 Turquoise Banana for ID: " .. userId) end -- Found Discord ID.
+            break
+        end
+    end
+    local userRole = nil
+    if type(role) == "number" then
+        userRole = tostring(role)
+    else
+        userRole = Info.Whitelisted
+    end
+    
+    if userId then
+        local endpoint = ("guilds/%s/members/%s"):format(Info.guildId, userId)
+        local member = request("GET", endpoint, {})
+        if member.code == 200 then
+            local data = json.decode(member.data)
+            local roles = data.roles
+            for i = 1, #roles do
+                if roles[i] == userRole then
+                    if alerts then print("^6[fca-discord]^0 Lilac Banana for ID: " .. userId) end -- Has Agreement role
+                    return true
+                end
+            end
+            if alerts then print("^6[fca-discord]^0 Red Banana for ID: " .. userId) end -- Not Found
+            return false
+        else
+            if alerts then print("^6[fca-discord]^0 A Yellow Banana occured for ID: " .. userId) end -- User isn't in the Discord [Yellow Banana]
+            return false
+        end
+    else
+        return false
+    end
+end
+exports("roleCheck", roleCheck)
