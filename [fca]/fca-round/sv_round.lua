@@ -471,7 +471,11 @@ end
 
 RegisterCommand("reset_lobby", function(source)
 	if source > 0 then
-		print 'whoareyou?'
+		if exports['fca-discord']:roleCheck(source, 869867127295836180, false) then
+			endRound()
+		else
+			print(source..' is not authorized for reset_lobby command')		
+		end
 	else
 		endRound()
 	end
