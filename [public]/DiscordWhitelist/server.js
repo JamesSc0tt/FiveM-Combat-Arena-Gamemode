@@ -4,15 +4,15 @@
 
 /// Config Area ///
 
-var guild = "867360466048647178";
-var botToken = "ODY3NDA4Mjk5Nzc0ODM2NzM2.YPgq7g.uGjszZzIp5CUjbZ1lmJ4pT-WSME";
+var guild = "";
+var botToken = "";
 
 var whitelistRoles = [ // Roles by ID that are whitelisted.
-    "867361121408253992"
+    ""
 ]
 
 var blacklistRoles = [ // Roles by Id that are blacklisted.
-    "867407990625402911"
+    ""
 ]
 
 var notWhitelistedMessage = "You need to agree to the message in #read-to-join first!"
